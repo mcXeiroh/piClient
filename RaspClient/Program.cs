@@ -10,7 +10,16 @@ namespace RaspClient
     {
         static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
 
+            Logger.initialize();
+            PhysicalInOut.initialize();
+            Console.ReadKey();
+        }
+
+        static void OnProcessExit(object sender, EventArgs e)
+        {
+            Logger.closeFile();
         }
     }
 }
