@@ -43,11 +43,17 @@ namespace RaspClient
             if (raspPi != null)
             {
                 raspPi.SetOutputPinState(channel, state);
+                Logger.log(ERRORLEVEL.INFO, "Pin " + channel + " set to " + state);
             }
             else
             {
                 Logger.log(ERRORLEVEL.ERROR, "Piface not initialized");
             }
+        }
+
+        static void getIn(byte channel)
+        {
+            raspPi.GetInputPinState(channel);
         }
     }
 }

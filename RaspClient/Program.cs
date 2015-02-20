@@ -14,6 +14,7 @@ namespace RaspClient
 
             Logger.initialize();
             PhysicalInOut.initialize();
+            ConnectionHandler.initialize();
             Console.ReadKey();
         }
 
