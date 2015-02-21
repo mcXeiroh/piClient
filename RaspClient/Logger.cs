@@ -30,7 +30,7 @@ namespace RaspClient
             string finalOut = sb.ToString();
 
             Console.WriteLine(finalOut);
-            logDatWriter.Write(finalOut);
+            logDatWriter.WriteLine(finalOut);
 
         }
 

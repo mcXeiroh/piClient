@@ -15,10 +15,14 @@ namespace RaspClient
             Logger.initialize();
             PhysicalInOut.initialize();
             ConnectionHandler.initialize();
-            Console.ReadKey();
+            string input;
+            do
+            {
+                input = Console.ReadLine();
+            } while (input != "exit");
         }
 
-        static void OnProcessExit(object sender, EventArgs e)
+        static void OnProcessExit(object source, EventArgs e)
         {
             Logger.closeFile();
         }

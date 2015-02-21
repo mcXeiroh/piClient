@@ -5,12 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Kingsland.PiFaceSharp.Spi;
 using System.Threading;
+using System.Timers;
 
 namespace RaspClient
 {
     class PhysicalInOut
     {
         static PiFaceDevice raspPi;
+        static System.Timers.Timer testpulse;
+        static bool[] lastState = new bool[8];
+        
         public static bool initialize()
         {
             try
@@ -27,6 +31,10 @@ namespace RaspClient
                 {
                     raspPi.GetInputPinState((byte)i);
                 }
+
+                testpulse = new System.Timers.Timer(5);
+                testpulse.Elapsed += new ElapsedEventHandler(checkInputs);
+                testpulse.Start();
 
                 Logger.log(ERRORLEVEL.DEBUG, "No Errors occured");
                 return true;
@@ -51,9 +59,21 @@ namespace RaspClient
             }
         }
 
-        static void getIn(byte channel)
+        static void checkInputs(object source, ElapsedEventArgs e)
         {
-            raspPi.GetInputPinState(channel);
+            for (int i = 0; i < 8; i++)
+            {
+                if (getIn((byte)i) != lastState[i])
+                {
+                    lastState[i] = getIn((byte)i);
+                    ProtocolBuilder.buildMessage(i, lastState[i]);
+                }
+            }
+        }
+
+        static bool getIn(byte channel)
+        {
+            return raspPi.GetInputPinState(channel);
         }
     }
 }

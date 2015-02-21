@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RaspClient
@@ -12,6 +13,7 @@ namespace RaspClient
     {
         static TcpListener listener;
         static TcpClient c;
+        static NetworkStream netstream;
         const int port = 11000;
 
         public static void initialize()
@@ -21,7 +23,6 @@ namespace RaspClient
             {
                 listener = new TcpListener(IPAddress.Any, port);
                 listener.Start();
-                AcceptNext();
                 Logger.log(ERRORLEVEL.INFO, "Server startet, listening on port " + port);
             }
             catch (SocketException se)
@@ -31,25 +32,36 @@ namespace RaspClient
             }
         }
 
-        public static void AcceptNext()
+        private static void startAccepting()
         {
-            Task task = AcceptClient();
+            while (true)
+            {
+                c = listener.AcceptTcpClient();
+
+                while (SocketConnected(c))
+                {
+                    ProtocolBuilder.interpretMessage(dataReader());
+                    Thread.Sleep(5);
+                }
+            }
         }
 
-        private static async Task AcceptClient()
+        private static byte[] dataReader()
         {
-            try 
+            byte[] rcvBuffer = new byte[512];
+            if (netstream.DataAvailable)
             {
-                c = await listener.AcceptTcpClientAsync();
+                netstream.Read(rcvBuffer, 0, rcvBuffer.Length);
             }
-            catch (Exception e)
+            else
             {
-                Logger.log(e);
+                return null;
             }
 
+            return rcvBuffer;
         }
 
-        public bool SocketConnected(TcpClient c)
+        public static bool SocketConnected(TcpClient c) //simple function to test if the client is still connected
         {
             bool part1 = c.Client.Poll(1000, SelectMode.SelectRead);
             bool part2 = (c.Available == 0);
@@ -57,6 +69,18 @@ namespace RaspClient
                 return false;
             else
                 return true;
+        }
+
+        public static void sendEvent(byte[] encryptedMessage)
+        {
+            if (SocketConnected(c))
+            {
+                netstream.Write(encryptedMessage, 0, encryptedMessage.Length);
+            }
+            else
+            {
+                Logger.log(ERRORLEVEL.WARN, "Socket is not connected");
+            }
         }
     }
 }
