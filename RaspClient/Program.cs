@@ -1,4 +1,5 @@
-﻿using System;
+﻿using piServer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,18 @@ namespace RaspClient
 {
     class Program
     {
+        public static bool debug = false;
         static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(Logger.OnProcessExit);
+            foreach (string arg in args)
+            {
+                if (arg == "debug")
+                {
+                    debug = true;
+                }
+            }
+
 
             Logger.initialize();
             PhysicalInOut.initialize();
@@ -22,9 +32,5 @@ namespace RaspClient
             } while (input != "exit");
         }
 
-        static void OnProcessExit(object source, EventArgs e)
-        {
-            Logger.closeFile();
-        }
     }
 }

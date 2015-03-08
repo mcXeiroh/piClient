@@ -1,4 +1,5 @@
-﻿using System;
+﻿using piServer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -41,24 +42,23 @@ namespace RaspClient
                 while (SocketConnected(c))
                 {
                     ProtocolBuilder.interpretMessage(dataReader());
-                    Thread.Sleep(5);
                 }
             }
         }
 
-        private static byte[] dataReader()
+        private static string dataReader()
         {
             byte[] rcvBuffer = new byte[512];
-            if (netstream.DataAvailable)
-            {
-                netstream.Read(rcvBuffer, 0, rcvBuffer.Length);
-            }
-            else
-            {
-                return null;
-            }
+            StringBuilder sb = new StringBuilder();
 
-            return rcvBuffer;
+            while (!netstream.DataAvailable) Thread.Sleep(5);
+
+            while (netstream.Read(rcvBuffer, 0, rcvBuffer.Length) > 0)
+            {
+                sb.Append(Encoding.UTF8.GetString(rcvBuffer));
+                rcvBuffer = new byte[512];
+            }
+            return sb.ToString();
         }
 
         public static bool SocketConnected(TcpClient c) //simple function to test if the client is still connected

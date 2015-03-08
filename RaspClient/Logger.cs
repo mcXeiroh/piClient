@@ -1,15 +1,40 @@
-﻿using System;
+﻿using RaspClient;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RaspClient
+namespace piServer
 {
+    /**
+    * author: Folke Gleumes on 20.02.2015
+    * edited by Jan
+    */
     class Logger
     {
         static StreamWriter logDatWriter;
+
+        public static void warn(string msg)
+        {
+            log(ERRORLEVEL.WARN, msg);
+        }
+
+        public static void error(string msg)
+        {
+            log(ERRORLEVEL.ERROR, msg);
+        }
+
+        public static void debug(string msg)
+        {
+            if (Program.debug) log(ERRORLEVEL.DEBUG, msg);
+        }
+
+        public static void info(string msg)
+        {
+            log(ERRORLEVEL.INFO, msg);
+        }
 
         public static void log(string errorLevel, string message)
         {
@@ -63,6 +88,11 @@ namespace RaspClient
             }
 
 
+        }
+
+        public static void OnProcessExit(object sender, EventArgs e)
+        {
+            closeFile();
         }
 
         public static void log(Exception e)

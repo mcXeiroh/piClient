@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kingsland.PiFaceSharp.Spi;
 using System.Threading;
 using System.Timers;
+using piServer;
 
 namespace RaspClient
 {

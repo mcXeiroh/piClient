@@ -13,9 +13,9 @@ namespace RaspClient
             //TODO
         }
 
-        public static void interpretMessage(byte[] encryptedMessage)
+        public static void interpretMessage(string msg)
         {
-            string decrypted = Encoding.UTF8.GetString(encryptedMessage);
+
             //TODO
         }
     }
