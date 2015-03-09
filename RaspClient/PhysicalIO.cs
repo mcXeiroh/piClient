@@ -10,10 +10,10 @@ using piServer;
 
 namespace RaspClient
 {
-    class PhysicalInOut
+    class PhysicalIO
     {
         static PiFaceDevice raspPi;
-        static System.Timers.Timer testpulse;
+        static System.Timers.Timer scanPulse;
         static bool[] lastState = new bool[8];
         
         public static bool initialize()
@@ -32,19 +32,19 @@ namespace RaspClient
                 {
                     raspPi.GetInputPinState((byte)i);
                 }
-
-                testpulse = new System.Timers.Timer(5);
-                testpulse.Elapsed += new ElapsedEventHandler(checkInputs);
-                testpulse.Start();
-
                 Logger.debug("No Errors occured");
-                return true;
             }
             catch (Exception e)
             {
                 Logger.log(e);
                 return false;
             }
+
+            scanPulse = new System.Timers.Timer(1);
+            scanPulse.Elapsed += new ElapsedEventHandler(getIn);
+            scanPulse.Start();
+            Logger.debug("testpulse started");
+            return true;
         }
 
         static void setOut(byte channel, bool state)
@@ -59,23 +59,18 @@ namespace RaspClient
                 Logger.error("Piface not initialized");
             }
         }
-
-        static void checkInputs(object source, ElapsedEventArgs e)
+        static void getIn(object source, ElapsedEventArgs e)
         {
             for (int i = 0; i < 8; i++)
             {
-                if (getIn((byte)i) != lastState[i])
+                bool curState;
+                if ((curState = raspPi.GetInputPinState((byte)i)) != lastState[i])
                 {
                     Logger.debug("input " + i + " changed");
-                    lastState[i] = getIn((byte)i);
+                    lastState[i] = curState;
                     ProtocolBuilder.buildPinEventMessage(i, lastState[i]);
                 }
             }
-        }
-
-        static bool getIn(byte channel)
-        {
-            return raspPi.GetInputPinState(channel);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace RaspClient
         {
             //TODO
         }
-
+        
         public static void interpretMessage(string msg)
         {
             //TODO

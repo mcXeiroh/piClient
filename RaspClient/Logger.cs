@@ -11,6 +11,7 @@ namespace piServer
     /**
     * author: Folke Gleumes on 20.02.2015
     * edited by Jan
+    * edited again by Folke on 09.03.2015
     */
     class Logger
     {
@@ -109,5 +110,12 @@ namespace piServer
         {
             logDatWriter.Close();
         }
+    }
+    class ERRORLEVEL
+    {
+        public const string INFO = "INFO";
+        public const string DEBUG = "DEBUG";
+        public const string WARN = "WARNING";
+        public const string ERROR = "ERROR";
     }
 }

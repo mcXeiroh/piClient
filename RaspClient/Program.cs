@@ -23,14 +23,19 @@ namespace RaspClient
 
 
             Logger.initialize();
-            PhysicalInOut.initialize();
+            PhysicalIO.initialize();
             ConnectionHandler.initialize();
             string input;
             do
             {
                 input = Console.ReadLine();
             } while (input != "exit");
-        }
 
+            try
+            {
+                ConnectionHandler.session.Abort();
+            }
+            catch { }
+        }
     }
 }

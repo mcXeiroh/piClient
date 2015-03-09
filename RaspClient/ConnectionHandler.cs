@@ -14,8 +14,8 @@ namespace RaspClient
     class ConnectionHandler
     {
         static TcpListener listener;
-        static TcpClient c;
-        static Thread session;
+        static TcpClient client;
+        public static Thread session;
         static NetworkStream netstream;
         const int port = 11000;
 
@@ -27,7 +27,7 @@ namespace RaspClient
                 listener = new TcpListener(IPAddress.Any, port);
                 listener.Start();
                 Logger.info("Server startet, listening on port " + port);
-                session = new Thread(startAccepting);
+                session = new Thread(StartSession);
                 session.Start();
             }
             catch (SocketException se)
@@ -39,46 +39,46 @@ namespace RaspClient
 
         }
 
-        private static void startAccepting()
+        private static void StartSession()
         {
             while (true)
             {
                 Logger.debug("accepting client");
-                c = listener.AcceptTcpClient();
-                netstream = c.GetStream();
+                client = listener.AcceptTcpClient();
+                netstream = client.GetStream();
                 Logger.info("client connected");
 
-                while (SocketConnected(c))
+                while (client.TestConnection())
                 {
-                    ProtocolBuilder.interpretMessage(dataReader());
+                    ProtocolBuilder.interpretMessage(NextMsg());
                 }
             }
         }
 
-        private static string dataReader()
+        private static string NextMsg()
         {
             StreamReader sr = new StreamReader(netstream);
             Logger.debug("awaiting message");
-            string temp = sr.ReadLineSingleBreak();
+            string temp;
+            try
+            {
+                temp = sr.ReadLineSingleBreak();
+            }
+            catch
+            {
+                Logger.warn("connection closed unexpected");
+                return null;
+            }
             Logger.debug("recieved message: " + temp);
             return temp;
         }
 
-        public static bool SocketConnected(TcpClient c) //simple function to test if the client is still connected
+        public static void SendMsg(string msg)
         {
-            bool part1 = c.Client.Poll(1000, SelectMode.SelectRead);
-            bool part2 = (c.Available == 0);
-            if (part1 && part2)
-                return false;
-            else
-                return true;
-        }
-
-        public static void sendEvent(byte[] encryptedMessage)
-        {
-            if (SocketConnected(c))
+            if (client.TestConnection())
             {
-                netstream.Write(encryptedMessage, 0, encryptedMessage.Length);
+                StreamWriter sw = new StreamWriter(netstream);
+                sw.WriteLine(msg);
             }
             else
             {
@@ -86,7 +86,6 @@ namespace RaspClient
             }
         }
     }
-
     public static class StreamReaderExtensions // additional function for reading a line because the original readline-function doesn't works properly
     {
         public static string ReadLineSingleBreak(this StreamReader self)
@@ -107,6 +106,18 @@ namespace RaspClient
             }
 
             return currentLine.ToString();
+        }
+    }
+    public static class TcpClientExtensions // simple function to test if the client is still connected
+    {
+        public static bool TestConnection(this TcpClient c) 
+        {
+            bool part1 = c.Client.Poll(1000, SelectMode.SelectRead);
+            bool part2 = (c.Available == 0);
+            if (part1 && part2)
+                return false;
+            else
+                return true;
         }
     }
 }
