@@ -8,14 +8,13 @@ namespace RaspClient
 {
     class ProtocolBuilder
     {
-        public static void buildMessage(int pin, bool state)
+        public static void buildPinEventMessage(int pin, bool state)
         {
             //TODO
         }
 
         public static void interpretMessage(string msg)
         {
-
             //TODO
         }
     }

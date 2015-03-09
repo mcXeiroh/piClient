@@ -37,7 +37,7 @@ namespace RaspClient
                 testpulse.Elapsed += new ElapsedEventHandler(checkInputs);
                 testpulse.Start();
 
-                Logger.log(ERRORLEVEL.DEBUG, "No Errors occured");
+                Logger.debug("No Errors occured");
                 return true;
             }
             catch (Exception e)
@@ -52,11 +52,11 @@ namespace RaspClient
             if (raspPi != null)
             {
                 raspPi.SetOutputPinState(channel, state);
-                Logger.log(ERRORLEVEL.INFO, "Pin " + channel + " set to " + state);
+                Logger.debug("Pin " + channel + " set to " + state);
             }
             else
             {
-                Logger.log(ERRORLEVEL.ERROR, "Piface not initialized");
+                Logger.error("Piface not initialized");
             }
         }
 
@@ -66,8 +66,9 @@ namespace RaspClient
             {
                 if (getIn((byte)i) != lastState[i])
                 {
+                    Logger.debug("input " + i + " changed");
                     lastState[i] = getIn((byte)i);
-                    ProtocolBuilder.buildMessage(i, lastState[i]);
+                    ProtocolBuilder.buildPinEventMessage(i, lastState[i]);
                 }
             }
         }

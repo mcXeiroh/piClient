@@ -1,6 +1,7 @@
 ﻿using piServer;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -14,6 +15,7 @@ namespace RaspClient
     {
         static TcpListener listener;
         static TcpClient c;
+        static Thread session;
         static NetworkStream netstream;
         const int port = 11000;
 
@@ -24,20 +26,27 @@ namespace RaspClient
             {
                 listener = new TcpListener(IPAddress.Any, port);
                 listener.Start();
-                Logger.log(ERRORLEVEL.INFO, "Server startet, listening on port " + port);
+                Logger.info("Server startet, listening on port " + port);
+                session = new Thread(startAccepting);
+                session.Start();
             }
             catch (SocketException se)
             {
-                Logger.log(se);
+                Logger.error(se.Message);
                 Environment.Exit(se.ErrorCode);
             }
+
+
         }
 
         private static void startAccepting()
         {
             while (true)
             {
+                Logger.debug("accepting client");
                 c = listener.AcceptTcpClient();
+                netstream = c.GetStream();
+                Logger.info("client connected");
 
                 while (SocketConnected(c))
                 {
@@ -48,17 +57,11 @@ namespace RaspClient
 
         private static string dataReader()
         {
-            byte[] rcvBuffer = new byte[512];
-            StringBuilder sb = new StringBuilder();
-
-            while (!netstream.DataAvailable) Thread.Sleep(5);
-
-            while (netstream.Read(rcvBuffer, 0, rcvBuffer.Length) > 0)
-            {
-                sb.Append(Encoding.UTF8.GetString(rcvBuffer));
-                rcvBuffer = new byte[512];
-            }
-            return sb.ToString();
+            StreamReader sr = new StreamReader(netstream);
+            Logger.debug("awaiting message");
+            string temp = sr.ReadLineSingleBreak();
+            Logger.debug("recieved message: " + temp);
+            return temp;
         }
 
         public static bool SocketConnected(TcpClient c) //simple function to test if the client is still connected
@@ -79,8 +82,31 @@ namespace RaspClient
             }
             else
             {
-                Logger.log(ERRORLEVEL.WARN, "Socket is not connected");
+                Logger.warn("Socket is not connected");
             }
+        }
+    }
+
+    public static class StreamReaderExtensions // additional function for reading a line because the original readline-function doesn't works properly
+    {
+        public static string ReadLineSingleBreak(this StreamReader self)
+        {
+            StringBuilder currentLine = new StringBuilder();
+            int i;
+            char c;
+            while ((i = self.Read()) >= 0)
+            {
+                c = (char)i;
+                if (c == '\r'
+                    || c == '\n')
+                {
+                    break;
+                }
+
+                currentLine.Append(c);
+            }
+
+            return currentLine.ToString();
         }
     }
 }
