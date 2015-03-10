@@ -53,7 +53,7 @@ namespace RaspClient
                 Logger.debug("sending all input informations");
                 for (int i = 0; i < 8; i++)
                 {
-                    ProtocolBuilder.buildPinEventMessage(i + 1, raspPi.GetInputPinState((byte)i));
+                    ProtocolBuilder.buildPinEventMessage(i, raspPi.GetInputPinState((byte)i));
                 }
             }
             else
@@ -63,6 +63,7 @@ namespace RaspClient
         }
         public static void setOut(byte channel, bool state)
         {
+            channel--;
             if (raspPi != null)
             {
                 raspPi.SetOutputPinState(channel, state);

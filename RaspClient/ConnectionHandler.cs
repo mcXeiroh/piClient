@@ -88,7 +88,7 @@ namespace RaspClient
         public static void SendMsg(string msg)
         {
             Logger.debug("trying to send message");
-            if (netstream != null)
+            if (client.TestConnection())
             {
                 Logger.debug("writing msg to stream");
                 StreamWriter sw = new StreamWriter(netstream);
@@ -134,5 +134,6 @@ namespace RaspClient
             else
                 return true;
         }
+        
     }
 }

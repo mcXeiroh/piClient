@@ -11,7 +11,7 @@ namespace RaspClient
     {
         public static void buildPinEventMessage(int pin, bool state)
         {
-            ConnectionHandler.SendMsg("i " + pin + " " + state);
+            ConnectionHandler.SendMsg("i " + (pin + 1) + " " + state.ToString());
         }
         
         public static void interpretMessage(string msg)
@@ -32,6 +32,11 @@ namespace RaspClient
                         {
                             Logger.warn("protocol syntax error");
                         }
+                        break;
+                    }
+                default:
+                    {
+                        Logger.warn("protocol syntax error");
                         break;
                     }
             }
