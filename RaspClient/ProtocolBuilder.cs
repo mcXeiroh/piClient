@@ -1,4 +1,5 @@
-﻿using System;
+﻿using piServer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,12 +11,30 @@ namespace RaspClient
     {
         public static void buildPinEventMessage(int pin, bool state)
         {
-            //TODO
+            ConnectionHandler.SendMsg("i " + pin + " " + state);
         }
         
         public static void interpretMessage(string msg)
         {
-            //TODO
+            if (msg == null) return;
+            string[] splitMsg = msg.Split(' ');
+            
+            switch (splitMsg[0])
+            {
+                case "o":
+                    {
+                        Logger.debug("message recognized as output instruction");
+                        try
+                        {
+                            PhysicalIO.setOut(Convert.ToByte(splitMsg[1]), (splitMsg[2] == "True") ? true : false);
+                        }
+                        catch (FormatException)
+                        {
+                            Logger.warn("protocol syntax error");
+                        }
+                        break;
+                    }
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ namespace RaspClient
         public static Thread session;
         static NetworkStream netstream;
         const int port = 11000;
+        static int id;
 
         public static void initialize()
         {
@@ -48,6 +49,17 @@ namespace RaspClient
                 netstream = client.GetStream();
                 Logger.info("client connected");
 
+                try
+                {
+                    id = Convert.ToInt32(NextMsg());
+                    Logger.info("Id is " + id);
+                    PhysicalIO.sendAllInputs();
+                }
+                catch
+                {
+                    Logger.warn("protocol syntax error, invalid id");
+                }
+
                 while (client.TestConnection())
                 {
                     ProtocolBuilder.interpretMessage(NextMsg());
@@ -69,15 +81,18 @@ namespace RaspClient
                 Logger.warn("connection closed unexpected");
                 return null;
             }
-            Logger.debug("recieved message: " + temp);
+            if(temp != null) Logger.debug("recieved message: " + temp);
             return temp;
         }
 
         public static void SendMsg(string msg)
         {
-            if (client.TestConnection())
+            Logger.debug("trying to send message");
+            if (netstream != null)
             {
+                Logger.debug("writing msg to stream");
                 StreamWriter sw = new StreamWriter(netstream);
+                sw.AutoFlush = true;
                 sw.WriteLine(msg);
             }
             else

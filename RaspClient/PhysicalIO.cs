@@ -46,8 +46,22 @@ namespace RaspClient
             Logger.debug("testpulse started");
             return true;
         }
-
-        static void setOut(byte channel, bool state)
+        public static void sendAllInputs()
+        {
+            if (raspPi != null)
+            {
+                Logger.debug("sending all input informations");
+                for (int i = 0; i < 8; i++)
+                {
+                    ProtocolBuilder.buildPinEventMessage(i + 1, raspPi.GetInputPinState((byte)i));
+                }
+            }
+            else
+            {
+                Logger.error("Piface not initialized");
+            }
+        }
+        public static void setOut(byte channel, bool state)
         {
             if (raspPi != null)
             {
@@ -59,7 +73,7 @@ namespace RaspClient
                 Logger.error("Piface not initialized");
             }
         }
-        static void getIn(object source, ElapsedEventArgs e)
+        private static void getIn(object source, ElapsedEventArgs e)
         {
             for (int i = 0; i < 8; i++)
             {
