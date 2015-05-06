@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Kingsland.PiFaceSharp">
-      <HintPath>..\..\..\..\Documents\DLL's\uncompiled projects\PiFaceSharp-master\src\Kingsland.PiFaceSharp\bin\Debug\Kingsland.PiFaceSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Documents\Visual Studio 2015\dll\Kingsland.PiFaceSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

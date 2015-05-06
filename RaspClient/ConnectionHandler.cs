@@ -1,5 +1,4 @@
-﻿using piServer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -79,6 +78,7 @@ namespace RaspClient
             catch
             {
                 Logger.warn("connection closed unexpected");
+                PhysicalIO.setAll(false);
                 return null;
             }
             if(temp != null) Logger.debug("recieved message: " + temp);

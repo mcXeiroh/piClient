@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Kingsland.PiFaceSharp.Spi;
 using System.Threading;
 using System.Timers;
-using piServer;
 
 namespace RaspClient
 {
@@ -36,7 +35,7 @@ namespace RaspClient
             }
             catch (Exception e)
             {
-                Logger.log(e);
+                Logger.error(e.Message);
                 return false;
             }
 
@@ -59,6 +58,20 @@ namespace RaspClient
             else
             {
                 Logger.error("Piface not initialized");
+            }
+        }
+        public static void setAll(bool state)
+        {
+            if(raspPi != null)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    raspPi.SetOutputPinState((byte)i, state);
+                }
+                Logger.debug("All pins were set to " + state);
+            }else
+            {
+                Logger.warn("Piface not initialized");
             }
         }
         public static void setOut(byte channel, bool state)
