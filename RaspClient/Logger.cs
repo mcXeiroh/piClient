@@ -1,4 +1,9 @@
-﻿using RaspClient;
+﻿
+/**
+* author: Folke Gleumes on 20.02.2015
+* edited by Jan
+* edited again by Folke on 09.03.2015
+*/
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,38 +11,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace piServer
+namespace RaspClient
 {
-    /**
-    * author: Folke Gleumes on 20.02.2015
-    * edited by Jan
-    * edited again by Folke on 09.03.2015
-    */
     class Logger
     {
         static StreamWriter logDatWriter;
 
         public static void warn(string msg)
         {
-            log(ERRORLEVEL.WARN, msg);
+            log("WARN", msg);
         }
 
         public static void error(string msg)
         {
-            log(ERRORLEVEL.ERROR, msg);
+            log("ERROR", msg);
         }
 
         public static void debug(string msg)
         {
-            if (Program.debug) log(ERRORLEVEL.DEBUG, msg);
+            if (Program.debug) log("DEBUG", msg);
         }
 
         public static void info(string msg)
         {
-            log(ERRORLEVEL.INFO, msg);
+            log("INFO", msg);
         }
 
-        public static void log(string errorLevel, string message)
+        private static void log(string errorLevel, string message)
         {
             //Output-Builder
             StringBuilder sb = new StringBuilder();
@@ -55,13 +55,43 @@ namespace piServer
             }
             string finalOut = sb.ToString();
 
-            Console.WriteLine(finalOut);
+
+            if (errorLevel == "ERROR")
+            {
+                ConsoleColor foreCurrent = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(finalOut);
+                Console.ForegroundColor = foreCurrent;
+            }
+            else if (errorLevel == "WARN")
+            {
+                ConsoleColor foreCurrent = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(finalOut);
+                Console.ForegroundColor = foreCurrent;
+            }
+            else if (errorLevel == "DEBUG")
+            {
+                ConsoleColor foreCurrent = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(finalOut);
+                Console.ForegroundColor = foreCurrent;
+            }
+            else
+            {
+                Console.WriteLine(finalOut);
+            }
+
             logDatWriter.WriteLine(finalOut);
 
         }
 
         public static void initialize()
         {
+            //Add eventhandler to save file befor program starts or crashes
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(Logger.OnProcessExit);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Logger.OnProcessCrash);
+
             //Create log-directory
             string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory + @"logs");
             if (!Directory.Exists(logDirectory))
@@ -95,27 +125,23 @@ namespace piServer
         {
             closeFile();
         }
-
-        public static void log(Exception e)
+        public static void OnProcessCrash(object source, UnhandledExceptionEventArgs e)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(e.HResult);
-            sb.Append(" : ");
-            sb.Append(e.Message);
+            try
+            {
+                Exception ex = (Exception)e.ExceptionObject;
+                error(ex.Message);
+                closeFile();
+            }
+            catch
+            {
 
-            log(ERRORLEVEL.ERROR, sb.ToString());
+            }
         }
 
-        public static void closeFile()
+        private static void closeFile()
         {
             logDatWriter.Close();
         }
-    }
-    class ERRORLEVEL
-    {
-        public const string INFO = "INFO";
-        public const string DEBUG = "DEBUG";
-        public const string WARN = "WARNING";
-        public const string ERROR = "ERROR";
     }
 }
